@@ -3,15 +3,19 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class ClientHandler implements Runnable {
+    private Map<String, Socket> clients;
     private final Socket socket;
     private Scanner reader;
     private Writer writer;
 
     public ClientHandler(Socket socket) {
+        clients = new HashMap<>();
         this.socket = socket;
     }
 
@@ -24,6 +28,10 @@ public class ClientHandler implements Runnable {
             this.reader = reader;
             this.writer = writer;
 
+            clients.put("Henry".trim(), socket);
+            clients.forEach((s, client) -> {
+                System.out.println(s);
+            });
             sendResponse("Hello " + socket);
             while (true) {
                 if (reader.hasNextLine()) {

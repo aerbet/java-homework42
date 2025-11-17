@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 public class Server {
     private final int port;
     private final ExecutorService pool = Executors.newCachedThreadPool();
+    private final ClientManager clientManager = new ClientManager();
 
     private Server(int port) {
         this.port = port;
@@ -20,7 +21,7 @@ public class Server {
         try (ServerSocket server = new ServerSocket(port)) {
             while(!server.isClosed()) {
                 Socket socket = server.accept();
-                pool.submit(new ClientHandler(socket));
+                pool.submit(new ClientHandler(socket, clientManager));
             }
         } catch (IOException ioe) {
             System.out.printf("Could not listen on port: %s", port);

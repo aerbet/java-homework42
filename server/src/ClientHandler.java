@@ -3,43 +3,38 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class ClientHandler implements Runnable {
-    private Map<String, Socket> clients;
     private final Socket socket;
-    private Scanner reader;
+    private ClientManager clientManager;
+    private String clientName;
     private Writer writer;
 
-    public ClientHandler(Socket socket) {
-        clients = new HashMap<>();
+    public ClientHandler(Socket socket, ClientManager clientManager) {
         this.socket = socket;
+        this.clientManager = clientManager;
+        this.clientName = "User-" + socket.getPort();
     }
 
     public void run() {
-        System.out.printf("Connected client: %s%n", socket);
         try (
             socket;
             Scanner reader = getReader();
             PrintWriter writer = getWriter()) {
-            this.reader = reader;
             this.writer = writer;
 
-            clients.put("Henry".trim(), socket);
-            clients.forEach((s, client) -> {
-                System.out.println(s);
-            });
-            sendResponse("Hello " + socket);
+            clientManager.registerClient(clientName, this);
+            sendResponse("Hello " + clientName + ". You are successfully registered in our chat");
             while (true) {
                 if (reader.hasNextLine()) {
                     String message = reader.nextLine().trim();
                     if (isEmptyMessage(message) || isQuitMessage(message)) {
                         break;
                     }
-                    sendResponse(message.toUpperCase());
+
+                    clientManager.sendMessageToAllClients(message, clientName);
                 } else {
                     break;
                 }
@@ -50,7 +45,16 @@ public class ClientHandler implements Runnable {
             ioe.printStackTrace();
         }
         System.out.println("Client disconnected: " + socket);
+    }
 
+    public void sendServerMessage(String message) {
+        try {
+            writer.write(message);
+            writer.write(System.lineSeparator());
+            writer.flush();
+        } catch (IOException e) {
+            System.out.println("Error sending message to " + clientName + ": " + e.getMessage());
+        }
     }
 
     private void sendResponse(String response) throws IOException {

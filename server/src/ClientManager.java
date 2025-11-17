@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,7 +17,7 @@ public class ClientManager {
         System.out.println("Client " + name + " has been unregistered!");
     }
 
-    public void sendMessageToAllClients(String message, String senderName) throws IOException {
+    public void sendMessageToAllClients(String message, String senderName) {
         clients.forEach((clientName, clientHandler) -> {
             if (!clientName.equals(senderName)) {
                 clientHandler.sendServerMessage(senderName + ": " + message);

@@ -25,15 +25,14 @@ public class ClientHandler implements Runnable {
             PrintWriter writer = getWriter()) {
             this.writer = writer;
 
-            clientManager.registerClient(clientName, this);
-            sendResponse("Hello " + clientName + ". You are successfully registered in our chat");
+            clientManager.registerClient(clientName.trim(), this);
+            sendResponse("Hello " + clientName + ". You are successfully registered in our chat.");
             while (true) {
                 if (reader.hasNextLine()) {
                     String message = reader.nextLine().trim();
                     if (isEmptyMessage(message) || isQuitMessage(message)) {
                         break;
                     }
-
                     clientManager.sendMessageToAllClients(message, clientName);
                 } else {
                     break;
@@ -44,7 +43,8 @@ public class ClientHandler implements Runnable {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-        System.out.println("Client disconnected: " + socket);
+        clientManager.unregisterClient(clientName);
+        clientManager.sendMessageToAllClients(clientName + " exit from our chat", "Server");
     }
 
     public void sendServerMessage(String message) {

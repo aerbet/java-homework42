@@ -27,6 +27,7 @@ bin/
 .vscode/
 .idea
 java-homework42.iml
+server/server.iml
 
 ### Mac OS ###
 .DS_Store
